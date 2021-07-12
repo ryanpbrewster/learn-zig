@@ -3,25 +3,54 @@ const sqlite = @cImport(@cInclude("sqlite3.h"));
 
 const DB_NAME = "hello.sqlite";
 
-pub fn main() void {
-  var db: ?*sqlite.sqlite3 = undefined;
-  _ = sqlite.sqlite3_open(DB_NAME, &db);
+pub fn main() !void {
+  var db = try Database.init(DB_NAME);
   std.debug.print("Opened {s}\n", .{DB_NAME});
   defer {
     std.debug.print("Closing {s}\n", .{DB_NAME});
-    _ = sqlite.sqlite3_close(db);
+    db.deinit() catch {};
   }
 
-  var err: [*c]u8 = undefined;
-  const rc = sqlite.sqlite3_exec(
-    db,
-    "CREATE TABLE foo (id INTEGER PRIMARY KEY, value TEXT NOT NULL)",
-    null,
-    null,
-    &err,
+  try db.exec(
+    "CREATE TABLE foo (id INTEGER PRIMARY KEY, value TEXT NOT NULL)"
   );
-  std.debug.print("exec: {}\n", .{rc});
-  if (rc != 0) {
-    std.debug.print("err = {s}\n", .{err});
-  }
 }
+
+const Database = struct {
+  const Self = @This();
+  db: *sqlite.sqlite3,
+
+  fn init(name: [:0]const u8) !Database {
+    var db: ?*sqlite.sqlite3 = undefined;
+    const rc = sqlite.sqlite3_open(name, &db);
+    if (rc != 0) {
+      return SqliteError.Unknown;
+    }
+    return Database { .db = db.? };
+  }
+  fn deinit(self: *Self) !void {
+    const rc = sqlite.sqlite3_close(self.db);
+    if (rc != 0) {
+      return SqliteError.Unknown;
+    }
+  }
+
+  fn exec(self: *Self, sql: [:0]const u8) !void {
+    var err: [*c]u8 = undefined;
+    const rc = sqlite.sqlite3_exec(
+      self.db,
+      sql,
+      null,
+      null,
+      &err,
+    );
+    if (rc != 0) {
+      std.log.warn("sqlite3_exec error: {s}\n", .{err});
+      return SqliteError.Unknown;
+    }
+  }
+};
+
+const SqliteError = error {
+  Unknown,
+};
