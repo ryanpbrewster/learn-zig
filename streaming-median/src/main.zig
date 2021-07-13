@@ -3,11 +3,11 @@ const Allocator = std.mem.Allocator;
 const PriorityQueue = std.PriorityQueue;
 const testing = std.testing;
 
-fn less_than(a: i32, b: i32) bool {
-    return a < b;
+fn less_than(a: i32, b: i32) std.math.Order {
+    return std.math.order(a, b);
 }
-fn greater_than(a: i32, b: i32) bool {
-    return a > b;
+fn greater_than(a: i32, b: i32) std.math.Order {
+    return std.math.order(a, b).invert();
 }
 const Median = struct {
   const Self = @This();
@@ -17,8 +17,8 @@ const Median = struct {
 
   fn new(allocator: *Allocator) Self {
     return Median {
-      .lo = PriorityQueue(i32).init(allocator, less_than),
-      .hi = PriorityQueue(i32).init(allocator, greater_than),
+      .lo = PriorityQueue(i32).init(allocator, greater_than),
+      .hi = PriorityQueue(i32).init(allocator, less_than),
     };
   }
   fn deinit(self: *Self) void {
@@ -58,5 +58,21 @@ test "smoke test" {
   try m.push(3);
   try m.push(1);
   try m.push(4);
-  testing.expectEqual(m.get_median(), 3);
+  try testing.expectEqual(m.get_median(), 3);
+  try m.push(1);
+  try m.push(5);
+  try m.push(9);
+  // [3, 1, 4, 1, 5, 9] --> [1, 1, 3, 4, 5, 9]
+  try testing.expectEqual(m.get_median(), 3);
+}
+
+test "sorted asc" {
+  var m = Median.new(testing.allocator);
+  defer m.deinit();
+
+  var i: i32 = 0;
+  while (i < 10) : (i += 1) {
+    try m.push(i);
+    try testing.expectEqual(m.get_median(), @divTrunc(i, 2));
+  }
 }
