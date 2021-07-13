@@ -1,3 +1,4 @@
 *.swp
 *.exe
 zig-cache/
+zig-out/
