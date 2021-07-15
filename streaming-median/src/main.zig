@@ -1,7 +1,10 @@
 const std = @import("std");
+const sort = std.sort;
 const Allocator = std.mem.Allocator;
 const PriorityQueue = std.PriorityQueue;
 const testing = std.testing;
+const DefaultPrng = std.rand.DefaultPrng;
+const ArrayList = std.ArrayList;
 
 fn less_than(a: i32, b: i32) std.math.Order {
     return std.math.order(a, b);
@@ -75,4 +78,26 @@ test "sorted asc" {
     try m.push(i);
     try testing.expectEqual(m.get_median(), @divTrunc(i, 2));
   }
+}
+
+test "psuedo-random" {
+  var m = Median.new(testing.allocator);
+  defer m.deinit();
+
+  var buf = ArrayList(i32).init(testing.allocator);
+  defer buf.deinit();
+
+  var prng = DefaultPrng.init(42);
+  var i: i32 = 0;
+  while (i < 1_000) : (i += 1) {
+    const x = prng.random.int(i32);
+    try m.push(x);
+    try buf.append(x);
+    try testing.expectEqual(m.get_median(), brute_force_median(buf.items));
+  }
+}
+
+fn brute_force_median(xs: []i32) ?i32 {
+  sort.sort(i32, xs, {}, comptime sort.asc(i32));
+  return xs[@divTrunc(xs.len - 1, 2)];
 }
