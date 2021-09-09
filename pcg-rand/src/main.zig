@@ -31,9 +31,9 @@ const Pcg = struct {
 
 test "pcg known seed" {
     var rand = Pcg.new(19, 84);
-    std.testing.expectEqual(rand.next(), 3180937136);
-    std.testing.expectEqual(rand.next(), 658176402);
-    std.testing.expectEqual(rand.next(), 2336700338);
-    std.testing.expectEqual(rand.next(), 4208611657);
-    std.testing.expectEqual(rand.next(), 1614422100);
+    try std.testing.expectEqual(rand.next(), 3180937136);
+    try std.testing.expectEqual(rand.next(), 658176402);
+    try std.testing.expectEqual(rand.next(), 2336700338);
+    try std.testing.expectEqual(rand.next(), 4208611657);
+    try std.testing.expectEqual(rand.next(), 1614422100);
 }
