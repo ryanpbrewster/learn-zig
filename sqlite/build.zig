@@ -6,7 +6,7 @@ pub fn build(b: *Builder) void {
 
     const exe = b.addExecutable("main.exe", "src/main.zig");
     exe.setTarget(.{
-      .abi = .musl,
+        .abi = .musl,
     });
     exe.setBuildMode(mode);
     exe.linkLibC();
@@ -26,4 +26,3 @@ pub fn build(b: *Builder) void {
     const run_step = b.step("run", "Run the app");
     run_step.dependOn(&run_cmd.step);
 }
-
