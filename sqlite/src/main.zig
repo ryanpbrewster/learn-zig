@@ -11,14 +11,17 @@ pub fn main() !void {
         db.deinit() catch {};
     }
 
-    try db.exec("CREATE TABLE foo (id INTEGER PRIMARY KEY, value TEXT NOT NULL)");
+    try db.exec("CREATE TABLE IF NOT EXISTS foo (id INTEGER PRIMARY KEY, value TEXT NOT NULL)");
+    std.debug.print("Created table 'foo'\n", .{});
+    try db.exec("INSERT OR IGNORE INTO foo (id, value) VALUES (1, 'hello')");
+    std.debug.print("Inserted record (1, 'hello') into 'foo'\n", .{});
 }
 
 const Database = struct {
     const Self = @This();
     db: *sqlite.sqlite3,
 
-    fn init(name: [:0]const u8) !Database {
+    fn init(name: [*c]const u8) !Database {
         var db: ?*sqlite.sqlite3 = undefined;
         const rc = sqlite.sqlite3_open(name, &db);
         if (rc != 0) {
@@ -33,7 +36,7 @@ const Database = struct {
         }
     }
 
-    fn exec(self: *Self, sql: [:0]const u8) !void {
+    fn exec(self: *Self, sql: [*c]const u8) !void {
         var err: [*c]u8 = undefined;
         const rc = sqlite.sqlite3_exec(
             self.db,

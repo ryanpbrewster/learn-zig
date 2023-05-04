@@ -6,22 +6,25 @@ const testing = std.testing;
 const DefaultPrng = std.rand.DefaultPrng;
 const ArrayList = std.ArrayList;
 
-fn less_than(a: i32, b: i32) std.math.Order {
+fn less_than(_: void, a: i32, b: i32) std.math.Order {
     return std.math.order(a, b);
 }
-fn greater_than(a: i32, b: i32) std.math.Order {
+fn greater_than(_: void, a: i32, b: i32) std.math.Order {
     return std.math.order(a, b).invert();
 }
+const PQmin = PriorityQueue(i32, void, less_than);
+const PQmax = PriorityQueue(i32, void, greater_than);
+
 const Median = struct {
     const Self = @This();
 
-    lo: PriorityQueue(i32), // a max-heap of small items
-    hi: PriorityQueue(i32), // a min-heap of large items
+    lo: PQmax, // a max-heap of small items
+    hi: PQmin, // a min-heap of large items
 
-    fn new(allocator: *Allocator) Self {
+    fn new(allocator: Allocator) Self {
         return Median{
-            .lo = PriorityQueue(i32).init(allocator, greater_than),
-            .hi = PriorityQueue(i32).init(allocator, less_than),
+            .lo = PQmax.init(allocator, {}),
+            .hi = PQmin.init(allocator, {}),
         };
     }
     fn deinit(self: *Self) void {
@@ -90,7 +93,7 @@ test "psuedo-random" {
     var prng = DefaultPrng.init(42);
     var i: i32 = 0;
     while (i < 1_000) : (i += 1) {
-        const x = prng.random.int(i32);
+        const x = prng.random().int(i32);
         try m.push(x);
         try buf.append(x);
         try testing.expectEqual(m.get_median(), brute_force_median(buf.items));

@@ -3,11 +3,11 @@ const std = @import("std");
 pub fn main() !void {
     var args = std.process.args();
     _ = args.skip();
-    const arg1 = try args.next(std.testing.allocator) orelse {
+    const arg1 = args.next() orelse {
         std.debug.print("Usage: ./farey.exe <max_denominator>\n", .{});
         return;
     };
-    const d_max = std.fmt.parseUnsigned(u32, arg1, 10) catch |e| {
+    const d_max = std.fmt.parseUnsigned(u32, arg1, 10) catch {
         std.debug.print("invalid value for max_denominator: {s}\n", .{arg1});
         return;
     };

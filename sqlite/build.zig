@@ -5,16 +5,14 @@ pub fn build(b: *Builder) void {
     const mode = b.standardReleaseOptions();
 
     const exe = b.addExecutable("main.exe", "src/main.zig");
-    exe.setTarget(.{
-        .abi = .musl,
-    });
+    exe.setTarget(.{});
     exe.setBuildMode(mode);
     exe.linkLibC();
-    exe.addIncludeDir("lib/sqlite");
+    exe.addIncludePath("lib/sqlite");
     exe.addCSourceFile("lib/sqlite/sqlite3.c", &[_][]const u8{
         "-Wall",
         "-Wextra",
-        "-Werror",
+        // "-Werror",
     });
     exe.install();
 

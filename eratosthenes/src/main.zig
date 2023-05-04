@@ -6,9 +6,9 @@ const ArrayList = std.ArrayList;
 const FixedSieve = struct {
     const Self = @This();
 
-    allocator: *Allocator,
+    allocator: Allocator,
     arr: []bool,
-    fn init(allocator: *Allocator, size: u32) !FixedSieve {
+    fn init(allocator: Allocator, size: u32) !FixedSieve {
         var arr = try allocator.alloc(bool, size);
         var i: u32 = 0;
         while (i < size) : (i += 1) {
@@ -42,7 +42,7 @@ const DynamicSieve = struct {
     const Self = @This();
 
     arr: ArrayList(bool),
-    fn init(allocator: *Allocator) DynamicSieve {
+    fn init(allocator: Allocator) DynamicSieve {
         return DynamicSieve{
             .arr = ArrayList(bool).init(allocator),
         };
