@@ -1,5 +1,4 @@
 const std = @import("std");
-const sort = std.sort;
 const Allocator = std.mem.Allocator;
 const PriorityQueue = std.PriorityQueue;
 const testing = std.testing;
@@ -101,6 +100,6 @@ test "psuedo-random" {
 }
 
 fn brute_force_median(xs: []i32) ?i32 {
-    sort.sort(i32, xs, {}, comptime sort.asc(i32));
+    std.sort.heap(i32, xs, {}, comptime std.sort.asc(i32));
     return xs[@divTrunc(xs.len - 1, 2)];
 }

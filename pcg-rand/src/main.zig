@@ -19,13 +19,13 @@ const Pcg = struct {
     fn next(self: *Pcg) u32 {
         const oldstate = self.state;
         self.state = oldstate *% 6364136223846793005 +% self.inc;
-        const xorshifted = @truncate(u32, ((oldstate >> 18) ^ oldstate) >> 27);
+        const xorshifted: u32 = @truncate(((oldstate >> 18) ^ oldstate) >> 27);
         // Zig seems incredibly opinionated about making sure that bit-shifts are valid.
         // Technically, a u64 shifted by 59 can have at most 5 bits.
         // A 5-bit integer can represent [0, 32).
         // Thus, it is safe to right-shift a u64 by a u5, or even a u6, but not a u7.
-        const rot = @truncate(u5, oldstate >> 59);
-        return @truncate(u32, (xorshifted >> rot) | (xorshifted << ((-%rot) & 31)));
+        const rot = @as(u5, @truncate(oldstate >> 59));
+        return @as(u32, @truncate((xorshifted >> rot) | (xorshifted << ((-%rot) & 31))));
     }
 };
 

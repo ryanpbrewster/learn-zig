@@ -24,7 +24,7 @@ fn explore(lo: Frac, hi: Frac, d_max: u32) void {
     if (mid.d > d_max) return;
 
     explore(lo, mid, d_max);
-    std.debug.print("{d:.4} --- {}/{}\n", .{ @intToFloat(f64, mid.n) / @intToFloat(f64, mid.d), mid.n, mid.d });
+    std.debug.print("{d:.4} --- {}/{}\n", .{ @as(f64, @floatFromInt(mid.n)) / @as(f64, @floatFromInt(mid.d)), mid.n, mid.d });
     explore(mid, hi, d_max);
 }
 
